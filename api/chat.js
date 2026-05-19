@@ -41,29 +41,28 @@ export default async function handler(req, res) {
     systemPrompt = PROMPTS[key] || PROMPTS.kid_vi;
   }
 
+  // Chuyển format Anthropic → Gemini (assistant → model)
+  const contents = (messages || []).map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: messages,
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: contents,
+          generationConfig: { maxOutputTokens: 1000 }
         })
-    });
+      }
+    );
 
     const data = await response.json();
-    let text = '';
-    if (data.content) {
-      data.content.forEach(block => {
-        if (block.type === 'text') text += block.text;
-      });
-    }
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     if (text) return res.json({ ok: true, text });
     return res.json({ ok: false, text: 'Mimi chưa hiểu, nói lại nhé!' });
