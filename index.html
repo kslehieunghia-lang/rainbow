@@ -6,7 +6,8 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#FFF0F5"/>
-<title>Rainbow</title>
+<title>Mimi English</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 130 150'%3E%3Cellipse cx='42' cy='38' rx='13' ry='30' fill='%23F4C0D1'/%3E%3Cellipse cx='42' cy='40' rx='7' ry='22' fill='%23FBEAF0'/%3E%3Cellipse cx='88' cy='38' rx='13' ry='30' fill='%23F4C0D1'/%3E%3Cellipse cx='88' cy='40' rx='7' ry='22' fill='%23FBEAF0'/%3E%3Ccircle cx='65' cy='75' r='38' fill='white' stroke='%23F4C0D1' stroke-width='1'/%3E%3Cellipse cx='65' cy='68' rx='46' ry='14' fill='%23ED93B1'/%3E%3Cpath d='M 19 72 Q 16 120 65 124 Q 114 120 111 72 Q 90 82 65 82 Q 40 82 19 72Z' fill='%23ED93B1'/%3E%3Cellipse cx='44' cy='82' rx='9' ry='6' fill='%23F4C0D1' opacity='0.7'/%3E%3Cellipse cx='86' cy='82' rx='9' ry='6' fill='%23F4C0D1' opacity='0.7'/%3E%3Cellipse cx='54' cy='70' rx='8' ry='9' fill='white'/%3E%3Cellipse cx='54' cy='71' rx='5' ry='6' fill='%233C3489'/%3E%3Ccircle cx='55.5' cy='69' r='2' fill='white'/%3E%3Cellipse cx='76' cy='70' rx='8' ry='9' fill='white'/%3E%3Cellipse cx='76' cy='71' rx='5' ry='6' fill='%233C3489'/%3E%3Ccircle cx='77.5' cy='69' r='2' fill='white'/%3E%3Cellipse cx='65' cy='80' rx='3.5' ry='2.5' fill='%23D4537E'/%3E%3Cpath d='M 55 86 Q 65 94 75 86' stroke='%23D4537E' stroke-width='2.5' fill='none'/%3E%3C/svg%3E"/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -91,7 +92,7 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:v
   <!-- HEADER -->
   <div class="header">
     <div class="top-bar">
-      <div class="app-title">🌈 Rainbow</div>
+      <div class="app-title">🐰 Mimi English</div>
       <div class="toggle-group" id="mode-toggle">
         <button class="toggle-btn active" onclick="setMode('kid',this)">Bé 👶</button>
         <button class="toggle-btn" onclick="setMode('adult',this)">Bố mẹ 👨‍👩‍👧</button>
@@ -159,7 +160,7 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:v
 
   <!-- CHAT -->
   <div class="chat-box" id="chat-box">
-    <div class="bubble ai">Xin chào! Mình là Rainbow 🌈 Hôm nay mình sẽ nói chuyện và luyện tiếng Anh cùng bạn nhé!</div>
+    <div class="bubble ai">Xin chào! Mình là Mimi 🌈 Hôm nay mình sẽ nói chuyện và luyện tiếng Anh cùng bạn nhé!</div>
   </div>
 
   <!-- BOTTOM PANEL -->
@@ -199,8 +200,8 @@ const STORIES={
   en:['Red Riding Hood','Three Pigs','Snow White','Cinderella','Ugly Duckling','Pinocchio','Goldilocks','Jack & Beanstalk','Little Mermaid','Sleeping Beauty']
 };
 const GREET={
-  chat:{kid:{vi:'Xin chào! Mình là Rainbow 🌈 Hôm nay mình muốn chơi và nói chuyện cùng bạn!',en:"Hello! I'm Rainbow 🌈 Let's talk and play together!"},adult:{vi:'Chào bạn! Mình là Rainbow 🌈 Cùng luyện tiếng Anh qua chuyện hàng ngày nhé!',en:"Hi! I'm Rainbow 🌈 Let's practice English through daily conversations!"}},
-  story:{vi:'Chào bạn nhỏ! Mình là Rainbow 🌈 Chọn một câu chuyện bên dưới để mình kể nhé! 📖',en:"Hello! I'm Rainbow 🌈 Pick a story below and I'll tell it! 📖"}
+  chat:{kid:{vi:'Xin chào! Mình là Mimi 🌈 Hôm nay mình muốn chơi và nói chuyện cùng bạn!',en:"Hello! I'm Mimi 🌈 Let's talk and play together!"},adult:{vi:'Chào bạn! Mình là Mimi 🌈 Cùng luyện tiếng Anh qua chuyện hàng ngày nhé!',en:"Hi! I'm Mimi 🌈 Let's practice English through daily conversations!"}},
+  story:{vi:'Chào bạn nhỏ! Mình là Mimi 🌈 Chọn một câu chuyện bên dưới để mình kể nhé! 📖',en:"Hello! I'm Mimi 🌈 Pick a story below and I'll tell it! 📖"}
 };
 
 const EMOTIONS={
@@ -365,7 +366,7 @@ function callAI(userText,isSystem,isStory){
   if(isWaiting)return;
   isWaiting=true;
   applyEmotion('thinking',true);
-  const thinking=addBubble(lang==='vi'?'Rainbow đang nghĩ...':'Rainbow is thinking...','ai',true,false);
+  const thinking=addBubble(lang==='vi'?'Mimi đang nghĩ...':'Mimi is thinking...','ai',true,false);
   let history=isStory?storyHistory:chatHistory;
   if(!isSystem)history.push({role:'user',content:userText});
   const messages=isSystem?[{role:'user',content:userText}]:history.slice();
@@ -382,14 +383,14 @@ function callAI(userText,isSystem,isStory){
   .then(r=>r.json())
   .then(function(result){
     isWaiting=false;thinking.remove();
-    let raw=result.text||(lang==='vi'?'Rainbow chưa hiểu, nói lại nhé!':"Rainbow didn't catch that!");
+    let raw=result.text||(lang==='vi'?'Mimi chưa hiểu, nói lại nhé!':"Mimi didn't catch that!");
     const tag=extractEmotionTag(raw);
     const clean=stripEmotionTag(raw);
     applyEmotion(tag||detectEmotion(clean),true);
     addBubble(clean,'ai',false,isStory);
     history.push({role:'assistant',content:clean});
     if(history.length>30){if(isStory)storyHistory=history.slice(-30);else chatHistory=history.slice(-30);}
-    setStatus(lang==='vi'?'🔊 Rainbow đang nói...':'🔊 Rainbow is speaking...');
+    setStatus(lang==='vi'?'🔊 Mimi đang nói...':'🔊 Mimi is speaking...');
     speak(clean);
   })
   .catch(function(){
@@ -420,4 +421,3 @@ resetIdleTimer();
 </script>
 </body>
 </html>
-
