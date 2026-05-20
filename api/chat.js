@@ -31,27 +31,52 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { type, mode, lang, messages } = req.body;
-
-  let systemPrompt;
-  if (type === 'story') {
-    systemPrompt = lang === 'vi' ? PROMPTS.story_vi : PROMPTS.story_en;
-  } else {
-    const key = (mode || 'kid') + '_' + (lang || 'vi');
-    systemPrompt = PROMPTS[key] || PROMPTS.kid_vi;
-  }
-
-  // Chuyển format sang chuẩn Gemini (user / model)
-  const contents = (messages || []).map(m => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: m.content }]
-  }));
-
-  // CHÚ Ý: Anh dán trực tiếp Khóa API mới (đuôi ...I374) vào giữa hai dấu nháy dưới đây nhé
-  const REAL_GEMINI_KEY = "AIzaSyD08-L65stY2GTiNjik8hbKN9GPWeWI374";
-
   try {
-    // Đổi model thành gemini-1.5-flash để tránh lỗi 403
+    const { type, mode, lang, messages } = req.body;
+
+    let systemPrompt;
+    if (type === 'story') {
+      systemPrompt = lang === 'vi' ? PROMPTS.story_vi : PROMPTS.story_en;
+    } else {
+      const key = (mode || 'kid') + '_' + (lang || 'vi');
+      systemPrompt = PROMPTS[key] || PROMPTS.kid_vi;
+    }
+
+    // 1. CHUẨN HÓA LỊCH SỬ CHAT: Lọc bỏ trùng lặp và ép đúng cấu trúc cặp đôi của Gemini
+    let cleanContents = [];
+    const rawMessages = messages || [];
+    
+    // Chỉ lấy tối đa 10 câu thoại gần nhất để tối ưu tốc độ và chi phí
+    const recentMessages = rawMessages.slice(-10); 
+
+    recentMessages.forEach(m => {
+      const currentRole = m.role === 'assistant' ? 'model' : 'user';
+      
+      // Nếu mảng rỗng hoặc role khác với phần tử cuối cùng -> Thêm mới hợp lệ
+      if (cleanContents.length === 0 || cleanContents[cleanContents.length - 1].role !== currentRole) {
+        cleanContents.push({
+          role: currentRole,
+          parts: [{ text: m.content || '' }]
+        });
+      } else {
+        // Nếu trùng role liên tiếp, gộp văn bản vào chung một phần tử để tránh lỗi cấu trúc cặp
+        cleanContents[cleanContents.length - 1].parts[0].text += " " + (m.content || '');
+      }
+    });
+
+    // Đảm bảo tin nhắn đầu tiên gửi lên Google luôn luôn phải là của 'user'
+    if (cleanContents.length > 0 && cleanContents[0].role === 'model') {
+      cleanContents.shift();
+    }
+    
+    if (cleanContents.length === 0) {
+      cleanContents.push({ role: 'user', parts: [{ text: 'Hello' }] });
+    }
+
+    // 2. KHÓA API CHUẨN ĐÃ KÍCH HOẠT VÍ TRẢ TRƯỚC CỦA ANH
+    const REAL_GEMINI_KEY = "AIzaSyD08-L65stY2GTiNjik8hbKN9GPWeWI374";
+
+    // 3. GỌI API SANG GEMINI 1.5 FLASH (BẢN ỔN ĐỊNH CHO TÀI KHOẢN PAY-AS-YOU-GO)
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${REAL_GEMINI_KEY}`,
       {
@@ -59,9 +84,9 @@ export default async function handler(req, res) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: contents,
+          contents: cleanContents,
           generationConfig: { 
-            maxOutputTokens: 1000,
+            maxOutputTokens: 800,
             temperature: 0.7
           }
         })
@@ -70,9 +95,10 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // Kiểm tra nếu Google trả về lỗi hệ thống thì báo ra log
+    // Bắt lỗi trực tiếp từ Google phản hồi về hệ thống
     if (data.error) {
-      return res.status(200).json({ ok: false, text: 'Lỗi Google API: ' + data.error.message });
+      console.error("Lỗi Google API:", data.error.message);
+      return res.status(200).json({ ok: false, text: 'Mimi đang bận một chút, bé thử lại nhé!' });
     }
 
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -81,9 +107,10 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, text: text });
     }
     
-    return res.status(200).json({ ok: false, text: 'Mimi chưa hiểu, nói lại nhé!' });
+    return res.status(200).json({ ok: false, text: 'Mimi chưa nghe rõ, bé nói lại nhé!' });
 
   } catch (e) {
-    return res.status(500).json({ ok: false, text: 'Lỗi kết nối server: ' + e.message });
+    console.error("Lỗi Serverless Function:", e.message);
+    return res.status(500).json({ ok: false, text: 'Lỗi kết nối máy chủ: ' + e.message });
   }
 }
