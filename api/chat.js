@@ -73,8 +73,8 @@ export default async function handler(req, res) {
       cleanContents.push({ role: 'user', parts: [{ text: 'Hello' }] });
     }
 
-    // 2. KHÓA API CHUẨN ĐÃ KÍCH HOẠT VÍ TRẢ TRƯỚC CỦA ANH
-    const REAL_GEMINI_KEY = "AIzaSyA3vw8bC5tXbCsamshWFUoOEhqkODg2k4M";
+    // 2. ĐỌC KEY TỪ BIẾN MÔI TRƯỜNG (cấu hình trong Vercel Dashboard)
+    const REAL_GEMINI_KEY = process.env.GEMINI_API_KEY;
 
     // 3. GỌI API SANG GEMINI 2.0 FLASH
     const response = await fetch(
