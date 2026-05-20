@@ -48,7 +48,7 @@ export default async function handler(req, res) {
   }));
 
   // CHÚ Ý: Anh dán trực tiếp Khóa API mới (đuôi ...I374) vào giữa hai dấu nháy dưới đây nhé
-  const REAL_GEMINI_KEY = "ĐIỀN_KHÓA_API_ĐUÔI_I374_CỦA_ANH_VÀO_ĐÂY";
+  const REAL_GEMINI_KEY = "AIzaSyD08-L65stY2GTiNjik8hbKN9GPWeWI374";
 
   try {
     // Đổi model thành gemini-1.5-flash để tránh lỗi 403
