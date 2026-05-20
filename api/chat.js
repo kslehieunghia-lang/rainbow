@@ -41,33 +41,49 @@ export default async function handler(req, res) {
     systemPrompt = PROMPTS[key] || PROMPTS.kid_vi;
   }
 
-  // Chuyển format Anthropic → Gemini (assistant → model)
+  // Chuyển format sang chuẩn Gemini (user / model)
   const contents = (messages || []).map(m => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }]
   }));
 
+  // CHÚ Ý: Anh dán trực tiếp Khóa API mới (đuôi ...I374) vào giữa hai dấu nháy dưới đây nhé
+  const REAL_GEMINI_KEY = "ĐIỀN_KHÓA_API_ĐUÔI_I374_CỦA_ANH_VÀO_ĐÂY";
+
   try {
+    // Đổi model thành gemini-1.5-flash để tránh lỗi 403
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${REAL_GEMINI_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: systemPrompt }] },
           contents: contents,
-          generationConfig: { maxOutputTokens: 1000 }
+          generationConfig: { 
+            maxOutputTokens: 1000,
+            temperature: 0.7
+          }
         })
       }
     );
 
     const data = await response.json();
+
+    // Kiểm tra nếu Google trả về lỗi hệ thống thì báo ra log
+    if (data.error) {
+      return res.status(200).json({ ok: false, text: 'Lỗi Google API: ' + data.error.message });
+    }
+
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    if (text) return res.json({ ok: true, text });
-    return res.json({ ok: false, text: 'Mimi chưa hiểu, nói lại nhé!' });
+    if (text) {
+      return res.status(200).json({ ok: true, text: text });
+    }
+    
+    return res.status(200).json({ ok: false, text: 'Mimi chưa hiểu, nói lại nhé!' });
 
   } catch (e) {
-    return res.status(500).json({ ok: false, text: 'Lỗi kết nối: ' + e.message });
+    return res.status(500).json({ ok: false, text: 'Lỗi kết nối server: ' + e.message });
   }
 }
