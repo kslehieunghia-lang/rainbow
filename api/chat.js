@@ -74,11 +74,11 @@ export default async function handler(req, res) {
     }
 
     // 2. KHÓA API CHUẨN ĐÃ KÍCH HOẠT VÍ TRẢ TRƯỚC CỦA ANH
-    const REAL_GEMINI_KEY = "AIzaSyA3vw8bC5tXbCsamshWFUoOEhqkODg2k4M";
+    const REAL_GEMINI_KEY = "AIzaSyD08-L65stY2GTiNjik8hbKN9GPWeWI374";
 
     // 3. GỌI API SANG GEMINI 2.0 FLASH
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${REAL_GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${REAL_GEMINI_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
