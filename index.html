@@ -30,6 +30,9 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:v
 .app-title{font-size:17px;font-weight:800;color:var(--pink-deep)}
 .mode-pill{background:white;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--text3);box-shadow:var(--shadow)}
 .settings-btn{width:36px;height:36px;border-radius:50%;border:none;background:white;box-shadow:var(--shadow);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.toggle-group{display:flex;background:white;border-radius:999px;padding:2px;gap:2px;box-shadow:var(--shadow)}
+.toggle-btn{padding:5px 10px;border-radius:999px;border:none;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;background:transparent;color:var(--text3);white-space:nowrap}
+.toggle-btn.active{background:var(--pink);color:white}
 
 /* STAGE */
 .stage{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:0 16px}
@@ -102,7 +105,10 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:v
   <div class="header">
     <div class="top-bar">
       <div class="app-title">🐰 Mimi English</div>
-      <div class="mode-pill" id="mode-pill">Bé 👶</div>
+      <div class="toggle-group" id="lang-toggle">
+        <button class="toggle-btn active" onclick="setLang('vi',this)">🇻🇳 Việt</button>
+        <button class="toggle-btn" onclick="setLang('en',this)">🇬🇧 English</button>
+      </div>
       <button class="settings-btn" onclick="openProfile()" aria-label="Cài đặt">⚙️</button>
     </div>
   </div>
@@ -187,7 +193,7 @@ const MIC_OFF = '<line x1="1" y1="1" x2="23" y2="23" stroke="white" stroke-width
 const MIC_STOP= '<rect x="6" y="6" width="12" height="12" rx="2" fill="white"/>';
 
 // ── STATE ──────────────────────────────────────────────────────────
-let mode='kid', speechLang='vi-VN';
+let mode='kid', lang='vi', speechLang='vi-VN';
 let isRecording=false, isSpeaking=false, isWaiting=false, autoListen=false;
 let recognition=null, chatHistory=[];
 let idleTimer=null, currentEmotion='happy';
@@ -222,10 +228,18 @@ function saveProfile(){
   applyProfile();
   resetChat();
 }
+function setLang(l, btn){
+  lang = l;
+  speechLang = l==='en' ? 'en-US' : 'vi-VN';
+  g('lang-toggle').querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadVoices();
+  chatHistory = [];
+  resetChat();
+}
 function applyProfile(){
   mode = profile.mode || 'kid';
   g('mode-pill').textContent = mode==='kid' ? 'Bé 👶' : 'Bố mẹ 👨‍👩‍👧';
-  speechLang = 'vi-VN';
   loadVoices();
 }
 
@@ -324,17 +338,6 @@ function stripEN(text){
   return text.replace(/\[EN\]([\s\S]*?)\[\/EN\]/gi,'$1').trim();
 }
 
-// ── LANG SWITCH — phát hiện lệnh chuyển ngôn ngữ ──────────────────
-function detectLangSwitch(text){
-  const t=text.toLowerCase();
-  if(/tiếng anh thôi|chỉ tiếng anh|english only|speak english|all english/.test(t)){
-    speechLang='en-US'; loadVoices(); return true;
-  }
-  if(/song ngữ|cả hai|tiếng việt|bilingual|cả tiếng anh lẫn việt/.test(t)){
-    speechLang='vi-VN'; loadVoices(); return false;
-  }
-  return false;
-}
 
 // ── SPEECH BUBBLE ──────────────────────────────────────────────────
 function showSpeechBubble(text){
@@ -437,7 +440,6 @@ function startAutoRecognition(){
         accumulatedText='';
         try{recognition.stop();}catch(err){}
         isRecording=false;
-        detectLangSwitch(text);
         showUserEcho(text);
         callAI(text);
         resetIdleTimer();
@@ -478,7 +480,7 @@ function callAI(userText){
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      mode, lang: speechLang.startsWith('en')?'en':'vi',
+      mode, lang,
       childName: profile.name||'bé',
       messages: chatHistory.slice()
     })
