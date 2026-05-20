@@ -78,7 +78,7 @@ export default async function handler(req, res) {
 
     // 3. GỌI API SANG GEMINI 1.5 FLASH (BẢN ỔN ĐỊNH CHO TÀI KHOẢN PAY-AS-YOU-GO)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${REAL_GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${REAL_GEMINI_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
