@@ -527,6 +527,9 @@ function toggleRecording(){
   resetIdleTimer();
 }
 
+let silenceTimer=null;
+let accumulatedText='';
+
 function startAutoRecognition(){
   if(!autoListen||isWaiting||isSpeaking||isRecording)return;
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -536,11 +539,12 @@ function startAutoRecognition(){
   try{
     recognition=new SR();
     recognition.lang=lang==='vi'?'vi-VN':'en-US';
-    recognition.continuous=false;
-    recognition.interimResults=false;
+    recognition.continuous=true;       // liên tục để kiểm soát silence thủ công
+    recognition.interimResults=true;   // nhận interim để biết user đang nói
 
     recognition.onstart=function(){
       isRecording=true;
+      accumulatedText='';
       applyEmotion('listening',false);
       setStatus(lang==='vi'?'🎙 Đang nghe...':'🎙 Listening...');
       hideSpeechBubble(300);
@@ -548,32 +552,51 @@ function startAutoRecognition(){
     };
 
     recognition.onresult=function(e){
-      const text=e.results[0][0].transcript.trim();
-      if(!text)return;
-      isRecording=false;
-      showUserEcho(text);
-      callAI(text,false,tab==='story');
-      resetIdleTimer();
-      updateMicUI();
+      // Gom tất cả kết quả final
+      let newFinal='';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        if(e.results[i].isFinal) newFinal+=e.results[i][0].transcript;
+      }
+      if(!newFinal) return; // chỉ interim, bỏ qua
+
+      accumulatedText+=newFinal;
+      clearTimeout(silenceTimer);
+
+      // Dừng 500ms sau khi nhận final cuối cùng → gửi lên AI
+      silenceTimer=setTimeout(()=>{
+        const text=accumulatedText.trim();
+        if(!text) return;
+        accumulatedText='';
+        try{recognition.stop();}catch(err){}
+        isRecording=false;
+        showUserEcho(text);
+        callAI(text,false,tab==='story');
+        resetIdleTimer();
+        updateMicUI();
+      }, 500);
     };
 
     recognition.onerror=function(e){
+      clearTimeout(silenceTimer);
+      accumulatedText='';
       isRecording=false;
       if(e.error==='not-allowed'){
         autoListen=false;
         setError('Cần cấp quyền micro.');
-      } else if(e.error==='no-speech'){
-        // Bình thường — restart lại
       }
       updateMicUI();
+      // Restart nếu lỗi thường (no-speech, network...)
+      if(autoListen&&!isWaiting&&!isSpeaking&&e.error!=='not-allowed'){
+        setTimeout(startAutoRecognition,400);
+      }
     };
 
     recognition.onend=function(){
+      clearTimeout(silenceTimer);
       isRecording=false;
       updateMicUI();
-      // Nếu vẫn trong auto mode và không đang chờ AI / Mimi nói → restart
       if(autoListen&&!isWaiting&&!isSpeaking){
-        setTimeout(startAutoRecognition, 350);
+        setTimeout(startAutoRecognition,350);
       }
     };
 

@@ -1,3 +1,10 @@
+const RULE = `ĐỊNH DẠNG BẮT BUỘC (luôn tuân thủ):
+- KHÔNG dùng markdown: không **, không *, không #, không gạch đầu dòng
+- Chỉ viết văn nói thuần túy, ngắn gọn
+- Mặc định tối đa 2 câu. Chỉ trả lời dài hơn khi người dùng hỏi thêm hoặc yêu cầu giải thích
+- Khi dạy 1 câu/từ: nói thẳng câu đó, KHÔNG giải thích dài dòng trừ khi được hỏi
+`;
+
 const PROMPTS = {
   kid_vi: `Bạn là Mimi, thỏ hồng — vừa là người bạn thân vừa là gia sư tiếng Anh của bé 4-8 tuổi Việt Nam.
 
@@ -127,10 +134,10 @@ export default async function handler(req, res) {
 
     let systemPrompt;
     if (type === 'story') {
-      systemPrompt = lang === 'vi' ? PROMPTS.story_vi : PROMPTS.story_en;
+      systemPrompt = RULE + (lang === 'vi' ? PROMPTS.story_vi : PROMPTS.story_en);
     } else {
       const key = (mode || 'kid') + '_' + (lang || 'vi');
-      systemPrompt = PROMPTS[key] || PROMPTS.kid_vi;
+      systemPrompt = RULE + (PROMPTS[key] || PROMPTS.kid_vi);
     }
 
     // 1. CHUẨN HÓA LỊCH SỬ CHAT: Lọc bỏ trùng lặp và ép đúng cấu trúc cặp đôi của Gemini
@@ -176,8 +183,8 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: systemPrompt }] },
           contents: cleanContents,
-          generationConfig: { 
-            maxOutputTokens: 800,
+          generationConfig: {
+            maxOutputTokens: 180,
             temperature: 0.7
           }
         })
