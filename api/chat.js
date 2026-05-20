@@ -1,8 +1,10 @@
 const RULE = `ĐỊNH DẠNG BẮT BUỘC (luôn tuân thủ):
 - KHÔNG dùng markdown: không **, không *, không #, không gạch đầu dòng
 - Chỉ viết văn nói thuần túy, ngắn gọn
-- Mặc định tối đa 2 câu. Chỉ trả lời dài hơn khi người dùng hỏi thêm hoặc yêu cầu giải thích
-- Khi dạy 1 câu/từ: nói thẳng câu đó, KHÔNG giải thích dài dòng trừ khi được hỏi
+- Mặc định tối đa 2 câu. Chỉ trả lời dài hơn khi người dùng yêu cầu
+- Khi dạy 1 câu/từ tiếng Anh: bọc câu đó trong thẻ [EN]...[/EN] để hiển thị lên màn hình. Ví dụ: Bé thử nói nhé! [EN]Did you have fun at school today?[/EN]
+- Trò chuyện tiếng Việt bình thường thì KHÔNG dùng thẻ [EN]
+- Khi người dùng nói "tiếng Anh thôi" hoặc "English only": chuyển sang nói hoàn toàn tiếng Anh
 `;
 
 const PROMPTS = {
@@ -130,7 +132,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { type, mode, lang, messages } = req.body;
+    const { type, mode, lang, messages, childName } = req.body;
+    const name = childName || 'bé';
 
     let systemPrompt;
     if (type === 'story') {
@@ -139,6 +142,8 @@ export default async function handler(req, res) {
       const key = (mode || 'kid') + '_' + (lang || 'vi');
       systemPrompt = RULE + (PROMPTS[key] || PROMPTS.kid_vi);
     }
+    // Chèn tên bé vào prompt
+    systemPrompt = systemPrompt.replace(/\{name\}/g, name) + `\n\nTên người dùng: ${name}.`;
 
     // 1. CHUẨN HÓA LỊCH SỬ CHAT: Lọc bỏ trùng lặp và ép đúng cấu trúc cặp đôi của Gemini
     let cleanContents = [];
