@@ -197,7 +197,7 @@ let mode='kid', lang='vi', speechLang='vi-VN';
 let isRecording=false, isSpeaking=false, isWaiting=false, autoListen=false;
 let recognition=null, chatHistory=[];
 let idleTimer=null, currentEmotion='happy';
-let voices=[], selectedVoice=null;
+let voices=[], viVoice=null, enVoice=null;
 let silenceTimer=null, accumulatedText='';
 let bubbleHideTimer=null;
 let audioCtx=null;
@@ -265,23 +265,24 @@ function playPip(freq=880, dur=0.12){
 }
 
 // ── VOICE SELECTION ────────────────────────────────────────────────
+function scoreVoice(v, preferFemale){
+  let s=0;
+  const n=v.name.toLowerCase();
+  if(n.includes('google'))s+=40;
+  if(n.includes('microsoft'))s+=30;
+  if(preferFemale&&(n.includes('female')||n.includes('zira')||n.includes('samantha')||n.includes('ava')||n.includes('karen')||n.includes('nora')||n.includes('sara')))s+=20;
+  return s;
+}
 function loadVoices(){
   voices=window.speechSynthesis.getVoices();
   if(!voices.length)return;
-  const langCode=speechLang.startsWith('vi')?'vi':'en';
-  const filtered=voices.filter(v=>v.lang.startsWith(langCode));
-  const pool=filtered.length?filtered:voices;
-  function score(v){
-    let s=0;
-    const n=v.name.toLowerCase();
-    if(n.includes('google'))s+=40;
-    if(n.includes('microsoft'))s+=30;
-    if(mode==='kid'||true){
-      if(n.includes('female')||n.includes('zira')||n.includes('samantha')||n.includes('ava')||n.includes('karen')||n.includes('nora')||n.includes('sara'))s+=20;
-    }
-    return s;
-  }
-  selectedVoice=pool.sort((a,b)=>score(b)-score(a))[0]||null;
+  const preferFemale=(mode==='kid');
+  // Giọng tiếng Việt
+  const viPool=voices.filter(v=>v.lang.startsWith('vi'));
+  viVoice=viPool.length ? viPool.sort((a,b)=>scoreVoice(b,preferFemale)-scoreVoice(a,preferFemale))[0] : null;
+  // Giọng tiếng Anh
+  const enPool=voices.filter(v=>v.lang.startsWith('en'));
+  enVoice=enPool.length ? enPool.sort((a,b)=>scoreVoice(b,preferFemale)-scoreVoice(a,preferFemale))[0] : null;
 }
 window.speechSynthesis.onvoiceschanged=loadVoices;
 loadVoices();
@@ -548,6 +549,14 @@ function speak(text){
   const chunks=buildChunks(text);
   let idx=0;
 
+  // Detect tiếng Anh thuần: không có dấu tiếng Việt + phần lớn là ký tự Latin
+  function isEnglishChunk(text){
+    const hasViet=/[àáạảãăắặẳẵâấậẩẫèéẹẻẽêếệểễìíịỉĩòóọỏõôốộổỗơớợởỡùúụủũưứựửữỳýỵỷỹđ]/i.test(text);
+    if(hasViet) return false;
+    const latin=(text.match(/[a-zA-Z]/g)||[]).length;
+    return latin/Math.max(text.replace(/\s/g,'').length,1)>0.55;
+  }
+
   function speakNext(){
     if(idx>=chunks.length){
       isSpeaking=false;
@@ -555,7 +564,7 @@ function speak(text){
       hideSpeechBubble(6000);
       resetIdleTimer();
       updateMicUI();
-      playPip(660,0.1); // pip nhỏ: tới lượt người dùng
+      playPip(660,0.1);
       if(autoListen) setTimeout(startAutoRecognition,500);
       else setStatus('Nhấn mic để trả lời! 🎤');
       return;
@@ -564,13 +573,18 @@ function speak(text){
     if(!chunk){speakNext();return;}
     const u=new SpeechSynthesisUtterance(chunk);
 
-    // Chọn ngôn ngữ đúng cho từng chunk (Anh/Việt)
-    const isEnChunk=/[a-zA-Z]/.test(chunk)&&chunk.replace(/[^a-zA-Z]/g,'').length>chunk.length*0.4;
-    u.lang=isEnChunk?'en-US':speechLang;
-    if(selectedVoice&&selectedVoice.lang.startsWith(u.lang.slice(0,2))) u.voice=selectedVoice;
+    // Gán đúng ngôn ngữ và giọng cho từng đoạn
+    if(isEnglishChunk(chunk)){
+      u.lang='en-US';
+      if(enVoice) u.voice=enVoice;
+    } else {
+      u.lang='vi-VN';
+      if(viVoice) u.voice=viVoice;
+      // Không có giọng vi → dùng giọng mặc định, đừng dùng enVoice
+    }
 
     if(mode==='kid'){u.rate=0.78;u.pitch=1.28;}
-    else {u.rate=0.90;u.pitch=1.05;}
+    else{u.rate=0.90;u.pitch=1.05;}
     if(currentEmotion==='excited'||currentEmotion==='laugh'){u.rate+=0.07;u.pitch+=0.12;}
     if(currentEmotion==='sleepy'){u.rate-=0.13;u.pitch-=0.1;}
     if(currentEmotion==='surprised'){u.pitch+=0.18;}
