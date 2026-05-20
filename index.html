@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Mimi"/>
 <meta name="theme-color" content="#FFF0F5"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
 <title>Mimi English</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 130 150'%3E%3Cellipse cx='42' cy='38' rx='13' ry='30' fill='%23F4C0D1'/%3E%3Cellipse cx='42' cy='40' rx='7' ry='22' fill='%23FBEAF0'/%3E%3Cellipse cx='88' cy='38' rx='13' ry='30' fill='%23F4C0D1'/%3E%3Cellipse cx='88' cy='40' rx='7' ry='22' fill='%23FBEAF0'/%3E%3Ccircle cx='65' cy='75' r='38' fill='white' stroke='%23F4C0D1' stroke-width='1'/%3E%3Cellipse cx='65' cy='68' rx='46' ry='14' fill='%23ED93B1'/%3E%3Cpath d='M 19 72 Q 16 120 65 124 Q 114 120 111 72 Q 90 82 65 82 Q 40 82 19 72Z' fill='%23ED93B1'/%3E%3Cellipse cx='44' cy='82' rx='9' ry='6' fill='%23F4C0D1' opacity='0.7'/%3E%3Cellipse cx='86' cy='82' rx='9' ry='6' fill='%23F4C0D1' opacity='0.7'/%3E%3Cellipse cx='54' cy='70' rx='8' ry='9' fill='white'/%3E%3Cellipse cx='54' cy='71' rx='5' ry='6' fill='%233C3489'/%3E%3Ccircle cx='55.5' cy='69' r='2' fill='white'/%3E%3Cellipse cx='76' cy='70' rx='8' ry='9' fill='white'/%3E%3Cellipse cx='76' cy='71' rx='5' ry='6' fill='%233C3489'/%3E%3Ccircle cx='77.5' cy='69' r='2' fill='white'/%3E%3Cellipse cx='65' cy='80' rx='3.5' ry='2.5' fill='%23D4537E'/%3E%3Cpath d='M 55 86 Q 65 94 75 86' stroke='%23D4537E' stroke-width='2.5' fill='none'/%3E%3C/svg%3E"/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
@@ -139,6 +143,17 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:v
 .mic-svg{width:28px;height:28px;fill:white}
 .mic-hint{margin-top:5px;font-size:11px;font-weight:700;color:var(--text3)}
 .error-msg{margin-top:3px;font-size:11px;font-weight:600;color:#c62828;text-align:center;min-height:14px;padding:0 12px}
+
+/* Auto-listen ring */
+.mic-btn.auto-waiting::after{
+  content:'';position:absolute;border-radius:50%;
+  width:80px;height:80px;top:-7px;left:-7px;
+  border:3px solid var(--pink);
+  animation:autoRing 1.6s ease-in-out infinite;
+  pointer-events:none;
+}
+.mic-btn{position:relative}
+@keyframes autoRing{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.15);opacity:.2}}
 </style>
 </head>
 <body>
@@ -244,11 +259,13 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:v
 </div>
 
 <script>
-const MIC_ON ='<path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1.5 4v6a1.5 1.5 0 0 0 3 0V5a1.5 1.5 0 0 0-3 0zM7 11a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.92V20h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2.08A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"/>';
-const MIC_OFF='<line x1="1" y1="1" x2="23" y2="23" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V5a3 3 0 00-5.94-.6"/><path d="M17 16.95A7 7 0 015 12v-2m14 0v2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>';
+const MIC_ON  = '<path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1.5 4v6a1.5 1.5 0 0 0 3 0V5a1.5 1.5 0 0 0-3 0zM7 11a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.92V20h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2.08A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"/>';
+const MIC_OFF = '<line x1="1" y1="1" x2="23" y2="23" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V5a3 3 0 00-5.94-.6"/><path d="M17 16.95A7 7 0 015 12v-2m14 0v2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>';
+const MIC_STOP= '<rect x="6" y="6" width="12" height="12" rx="2" fill="white"/>';
 
 let mode='kid', lang='vi', tab='chat';
 let isRecording=false, isSpeaking=false, isWaiting=false;
+let autoListen=false;                         // chế độ tự nghe liên tục
 let recognition=null, chatHistory=[], storyHistory=[], selectedChip=null;
 let idleTimer=null, currentEmotion='happy';
 let voices=[], kidVoice=null, adultVoice=null;
@@ -417,12 +434,18 @@ function setLang(l,btn){
   loadVoices();renderPanel();resetChat();
 }
 function resetChat(){
+  // Dừng auto-listen khi reset
+  autoListen=false;
+  if(recognition){try{recognition.stop();}catch(e){}}
+  isRecording=false; isSpeaking=false;
+  window.speechSynthesis.cancel();
+
   const gr=tab==='story'?GREET.story[lang]:GREET.chat[mode][lang];
   showSpeechBubble(gr,false);
-  hideSpeechBubble(6000);
-  setStatus(lang==='vi'?'Nhấn mic để nói! 🎤':'Press mic to talk! 🎤');
-  g('mic-hint').textContent=lang==='vi'?'Nhấn để nói':'Press to talk';
-  setError('');applyEmotion('happy',false);resetIdleTimer();
+  hideSpeechBubble(7000);
+  setStatus(lang==='vi'?'Nhấn mic để bắt đầu! 🎤':'Tap mic to start! 🎤');
+  setError('');applyEmotion('happy',false);
+  updateMicUI();resetIdleTimer();
 }
 function renderPanel(){
   if(tab==='chat'){
@@ -447,46 +470,118 @@ function selectStory(i,t){
   callAI(lang==='vi'?'Hãy bắt đầu kể chuyện "'+t+'" cho bé nghe! Kể phần mở đầu trước nhé!':'Please start telling the story "'+t+'"! Begin with the opening!',true,true);
 }
 
+// ── MIC BUTTON STATE ─────────────────────────────────────────────
+function updateMicUI(){
+  const btn=g('mic-btn');
+  const hint=g('mic-hint');
+  if(isSpeaking){
+    // Mimi đang nói → hiện nút Stop
+    btn.classList.remove('recording','auto-waiting');
+    g('mic-icon').innerHTML=MIC_STOP;
+    hint.textContent=lang==='vi'?'Nhấn để ngắt':'Tap to stop';
+  } else if(isRecording){
+    // Đang nghe giọng người dùng
+    btn.classList.add('recording');btn.classList.remove('auto-waiting');
+    g('mic-icon').innerHTML=MIC_OFF;
+    hint.textContent=lang==='vi'?'🎙 Đang nghe...':'🎙 Listening...';
+  } else if(autoListen){
+    // Auto mode — chờ nghe
+    btn.classList.remove('recording');btn.classList.add('auto-waiting');
+    g('mic-icon').innerHTML=MIC_ON;
+    hint.textContent=lang==='vi'?'Tự động nghe 🔄':'Auto listening 🔄';
+  } else {
+    // Thủ công — chưa bắt đầu
+    btn.classList.remove('recording','auto-waiting');
+    g('mic-icon').innerHTML=MIC_ON;
+    hint.textContent=lang==='vi'?'Nhấn để bắt đầu':'Tap to start';
+  }
+}
+
 // ── RECORDING ─────────────────────────────────────────────────────
 function toggleRecording(){
   if(isWaiting)return;
-  if(isSpeaking){window.speechSynthesis.cancel();isSpeaking=false;applyEmotion('happy',false);}
-  isRecording?stopRecording():startRecording();
+
+  if(isSpeaking){
+    // Ngắt Mimi đang nói
+    window.speechSynthesis.cancel();
+    isSpeaking=false;
+    applyEmotion('happy',false);
+    if(autoListen) setTimeout(startAutoRecognition, 400);
+    else updateMicUI();
+    return;
+  }
+
+  if(autoListen){
+    // Tắt auto-listen
+    autoListen=false;
+    if(recognition){try{recognition.stop();}catch(e){}}
+    isRecording=false;
+    setStatus(lang==='vi'?'Đã tắt tự nghe':'Auto-listen off');
+    updateMicUI();
+    return;
+  }
+
+  // Lần đầu bấm → bật auto-listen
+  autoListen=true;
+  startAutoRecognition();
   resetIdleTimer();
 }
-function startRecording(){
+
+function startAutoRecognition(){
+  if(!autoListen||isWaiting||isSpeaking||isRecording)return;
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){setError('Vui lòng dùng Chrome để dùng giọng nói.');return;}
+  if(!SR){setError('Vui lòng dùng Chrome.');autoListen=false;updateMicUI();return;}
   setError('');
-  recognition=new SR();
-  recognition.lang=lang==='vi'?'vi-VN':'en-US';
-  recognition.continuous=false;recognition.interimResults=false;
-  recognition.onstart=function(){
-    isRecording=true;g('mic-btn').classList.add('recording');setMicIcon(false);
-    setStatus(lang==='vi'?'🎙 Đang nghe...':'🎙 Listening...');
-    applyEmotion('listening',false);
-    hideSpeechBubble(200);
-  };
-  recognition.onresult=function(e){
-    const text=e.results[0][0].transcript;
-    stopRecording();
-    showUserEcho(text);
-    callAI(text,false,tab==='story');
-    resetIdleTimer();
-  };
-  recognition.onerror=function(e){
-    stopRecording();
-    setError(e.error==='not-allowed'?'Cần cấp quyền micro.':(lang==='vi'?'Không nghe rõ, thử lại!':'Could not hear, try again!'));
-    applyEmotion('surprised',true);
-  };
-  recognition.onend=function(){if(isRecording)stopRecording();};
-  recognition.start();
-}
-function stopRecording(){
-  isRecording=false;
-  if(recognition){try{recognition.stop();}catch(e){}}
-  g('mic-btn').classList.remove('recording');setMicIcon(true);
-  setStatus(lang==='vi'?'Đang xử lý...':'Processing...');
+
+  try{
+    recognition=new SR();
+    recognition.lang=lang==='vi'?'vi-VN':'en-US';
+    recognition.continuous=false;
+    recognition.interimResults=false;
+
+    recognition.onstart=function(){
+      isRecording=true;
+      applyEmotion('listening',false);
+      setStatus(lang==='vi'?'🎙 Đang nghe...':'🎙 Listening...');
+      hideSpeechBubble(300);
+      updateMicUI();
+    };
+
+    recognition.onresult=function(e){
+      const text=e.results[0][0].transcript.trim();
+      if(!text)return;
+      isRecording=false;
+      showUserEcho(text);
+      callAI(text,false,tab==='story');
+      resetIdleTimer();
+      updateMicUI();
+    };
+
+    recognition.onerror=function(e){
+      isRecording=false;
+      if(e.error==='not-allowed'){
+        autoListen=false;
+        setError('Cần cấp quyền micro.');
+      } else if(e.error==='no-speech'){
+        // Bình thường — restart lại
+      }
+      updateMicUI();
+    };
+
+    recognition.onend=function(){
+      isRecording=false;
+      updateMicUI();
+      // Nếu vẫn trong auto mode và không đang chờ AI / Mimi nói → restart
+      if(autoListen&&!isWaiting&&!isSpeaking){
+        setTimeout(startAutoRecognition, 350);
+      }
+    };
+
+    recognition.start();
+  }catch(err){
+    isRecording=false;
+    if(autoListen&&!isWaiting&&!isSpeaking) setTimeout(startAutoRecognition,500);
+  }
 }
 
 // ── CALL AI ───────────────────────────────────────────────────────
@@ -531,52 +626,91 @@ function callAI(userText,isSystem,isStory){
 }
 
 // ── SPEAK ─────────────────────────────────────────────────────────
+// Tách text thành chunks với pause phù hợp dấu câu
+function buildChunks(text){
+  const chunks=[];
+  // Tách câu theo dấu kết thúc
+  const sentences=text.split(/(?<=[.!?…])\s+|(?<=[.!?…])$/).filter(s=>s.trim());
+  if(!sentences.length) return [{text:text.trim(), pause:400}];
+
+  sentences.forEach(sentence=>{
+    const s=sentence.trim();
+    if(!s) return;
+    // Pause cuối câu dựa vào dấu
+    let endPause=420;
+    if(s.endsWith('!')) endPause=320;
+    if(s.endsWith('?')) endPause=520;
+    if(s.endsWith('...')||s.endsWith('…')) endPause=750;
+
+    // Tách thêm theo dấu phẩy nếu câu dài (>6 từ)
+    const parts=s.split(/,\s*/);
+    if(parts.length>1 && s.split(' ').length>6){
+      parts.forEach((part,i)=>{
+        const p=part.trim();
+        if(!p) return;
+        chunks.push({text:p, pause: i===parts.length-1 ? endPause : 210});
+      });
+    } else {
+      chunks.push({text:s, pause:endPause});
+    }
+  });
+  return chunks.length ? chunks : [{text:text.trim(), pause:400}];
+}
+
 function speak(text, isStory){
   window.speechSynthesis.cancel();
-  // Tách câu để thêm ngắt nghỉ tự nhiên
-  const sentences=text.match(/[^.!?。！？]+[.!?。！？]*/g)||[text];
+  const chunks=buildChunks(text);
   let idx=0;
 
   function speakNext(){
-    if(idx>=sentences.length){
+    if(idx>=chunks.length){
       isSpeaking=false;
-      if(currentEmotion!=='sleepy')applyEmotion('happy',false);
-      setStatus(lang==='vi'?'Nhấn mic để trả lời! 🎤':'Press mic to reply! 🎤');
-      hideSpeechBubble(5000);
+      if(currentEmotion!=='sleepy') applyEmotion('happy',false);
+      hideSpeechBubble(6000);
       resetIdleTimer();
+      updateMicUI();
+      // Auto-listen: bắt đầu nghe lại sau khi Mimi nói xong
+      if(autoListen) setTimeout(startAutoRecognition, 500);
+      else setStatus(lang==='vi'?'Nhấn mic để trả lời! 🎤':'Press mic to reply! 🎤');
       return;
     }
-    const sentence=sentences[idx++].trim();
-    if(!sentence){speakNext();return;}
+    const {text:chunk, pause}=chunks[idx++];
+    if(!chunk){speakNext();return;}
 
-    const u=new SpeechSynthesisUtterance(sentence);
+    const u=new SpeechSynthesisUtterance(chunk);
     u.lang=lang==='vi'?'vi-VN':'en-US';
 
     // Chọn giọng phù hợp
-    if(kidVoice && (mode==='kid'||isStory)) u.voice=kidVoice;
+    if(kidVoice&&(mode==='kid'||isStory)) u.voice=kidVoice;
     else if(adultVoice) u.voice=adultVoice;
 
-    // Rate & pitch theo mode
-    if(mode==='kid'||isStory){
-      u.rate=0.80;u.pitch=1.3;
-    } else {
-      u.rate=0.92;u.pitch=1.05;
-    }
-    // Điều chỉnh theo cảm xúc
-    if(currentEmotion==='excited'||currentEmotion==='laugh'){u.rate+=0.06;u.pitch+=0.1;}
-    if(currentEmotion==='sleepy'){u.rate-=0.12;u.pitch-=0.1;}
-    if(currentEmotion==='surprised'){u.pitch+=0.15;}
+    // Rate & pitch: kid chậm + cao hơn, adult bình thường
+    if(mode==='kid'||isStory){ u.rate=0.78; u.pitch=1.28; }
+    else { u.rate=0.90; u.pitch=1.05; }
 
-    u.onend=function(){setTimeout(speakNext,120);}; // ngắt nhỏ giữa câu
-    u.onerror=function(){speakNext();};
+    // Điều chỉnh theo cảm xúc
+    if(currentEmotion==='excited'||currentEmotion==='laugh'){ u.rate+=0.07; u.pitch+=0.12; }
+    if(currentEmotion==='sleepy'){ u.rate-=0.13; u.pitch-=0.1; }
+    if(currentEmotion==='surprised'){ u.pitch+=0.18; }
+
+    u.onend=function(){ setTimeout(speakNext, pause); };
+    u.onerror=function(){ speakNext(); };
     window.speechSynthesis.speak(u);
   }
 
   isSpeaking=true;
+  updateMicUI();
   speakNext();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
+// Đăng ký Service Worker (PWA)
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
+
 renderPanel();
 applyEmotion('happy',false);
 resetChat();

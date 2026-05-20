@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Pink background -->
+  <rect width="512" height="512" rx="110" fill="#FCE4EC"/>
+  <!-- Gradient overlay -->
+  <rect width="512" height="512" rx="110" fill="url(#bg-grad)" opacity="0.5"/>
+  <defs>
+    <radialGradient id="bg-grad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FFF0F5"/>
+      <stop offset="100%" stop-color="#F48FB1"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Scale and center the bunny (original viewBox 0 0 130 150) -->
+  <g transform="translate(100, 80) scale(2.4)">
+    <!-- Ears -->
+    <ellipse cx="42" cy="38" rx="13" ry="30" fill="#F4C0D1" stroke="#ED93B1" stroke-width="1"/>
+    <ellipse cx="42" cy="40" rx="7" ry="22" fill="#FBEAF0"/>
+    <ellipse cx="88" cy="38" rx="13" ry="30" fill="#F4C0D1" stroke="#ED93B1" stroke-width="1"/>
+    <ellipse cx="88" cy="40" rx="7" ry="22" fill="#FBEAF0"/>
+    <!-- Body -->
+    <ellipse cx="65" cy="68" rx="46" ry="14" fill="#ED93B1"/>
+    <path d="M 19 72 Q 16 120 65 124 Q 114 120 111 72 Q 90 82 65 82 Q 40 82 19 72Z" fill="#ED93B1"/>
+    <!-- Face -->
+    <circle cx="65" cy="75" r="38" fill="white" stroke="#F4C0D1" stroke-width="1"/>
+    <!-- Cheeks -->
+    <ellipse cx="44" cy="82" rx="9" ry="6" fill="#F4C0D1" opacity="0.8"/>
+    <ellipse cx="86" cy="82" rx="9" ry="6" fill="#F4C0D1" opacity="0.8"/>
+    <!-- Eyes -->
+    <ellipse cx="54" cy="70" rx="8" ry="9" fill="white"/>
+    <ellipse cx="54" cy="71" rx="5" ry="6" fill="#3C3489"/>
+    <circle cx="55.5" cy="69" r="2" fill="white"/>
+    <ellipse cx="76" cy="70" rx="8" ry="9" fill="white"/>
+    <ellipse cx="76" cy="71" rx="5" ry="6" fill="#3C3489"/>
+    <circle cx="77.5" cy="69" r="2" fill="white"/>
+    <!-- Brows -->
+    <path d="M 47 62 Q 54 59 61 62" stroke="#D4537E" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M 69 62 Q 76 59 83 62" stroke="#D4537E" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- Nose -->
+    <ellipse cx="65" cy="80" rx="3.5" ry="2.5" fill="#D4537E"/>
+    <!-- Smile -->
+    <path d="M 55 86 Q 65 94 75 86" stroke="#D4537E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- Bow -->
+    <path d="M 48 108 Q 65 118 82 108" stroke="#D4537E" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M 57 112 Q 60 106 65 110 Q 70 106 73 112 Q 65 116 57 112Z" fill="#D4537E" opacity="0.8"/>
+    <circle cx="65" cy="112" r="3" fill="#993556"/>
+    <!-- Paws -->
+    <ellipse cx="42" cy="126" rx="12" ry="8" fill="#F4C0D1" stroke="#ED93B1" stroke-width="0.5"/>
+    <ellipse cx="88" cy="126" rx="12" ry="8" fill="#F4C0D1" stroke="#ED93B1" stroke-width="0.5"/>
+  </g>
+</svg>
