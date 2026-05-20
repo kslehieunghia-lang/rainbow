@@ -42,28 +42,29 @@ export default async function handler(req, res) {
       systemPrompt = PROMPTS[key] || PROMPTS.kid_vi;
     }
 
-    // 1. CHUẨN HÓA LỊCH SỬ CHAT: Ép chặt cấu trúc xen kẽ (User -> Model -> User -> Model)
+    // 1. CHUẨN HÓA LỊCH SỬ CHAT: Lọc bỏ trùng lặp và ép đúng cấu trúc cặp đôi của Gemini
     let cleanContents = [];
     const rawMessages = messages || [];
     
-    // Chỉ giữ lại 8 câu thoại gần nhất để tối ưu dung lượng gói tin, tránh lỗi tràn Token
-    const recentMessages = rawMessages.slice(-8); 
+    // Chỉ lấy tối đa 10 câu thoại gần nhất để tối ưu tốc độ và chi phí
+    const recentMessages = rawMessages.slice(-10); 
 
     recentMessages.forEach(m => {
       const currentRole = m.role === 'assistant' ? 'model' : 'user';
       
+      // Nếu mảng rỗng hoặc role khác với phần tử cuối cùng -> Thêm mới hợp lệ
       if (cleanContents.length === 0 || cleanContents[cleanContents.length - 1].role !== currentRole) {
         cleanContents.push({
           role: currentRole,
           parts: [{ text: m.content || '' }]
         });
       } else {
-        // Gộp văn bản nếu trùng role liên tiếp để loại bỏ hoàn toàn lỗi cấu trúc mảng của Gemini v1
+        // Nếu trùng role liên tiếp, gộp văn bản vào chung một phần tử để tránh lỗi cấu trúc cặp
         cleanContents[cleanContents.length - 1].parts[0].text += " " + (m.content || '');
       }
     });
 
-    // Ép phần tử đầu tiên gửi đi bắt buộc phải là của 'user'
+    // Đảm bảo tin nhắn đầu tiên gửi lên Google luôn luôn phải là của 'user'
     if (cleanContents.length > 0 && cleanContents[0].role === 'model') {
       cleanContents.shift();
     }
@@ -72,39 +73,31 @@ export default async function handler(req, res) {
       cleanContents.push({ role: 'user', parts: [{ text: 'Hello' }] });
     }
 
-    // 2. KHÓA API CHUẨN ĐÃ KÍCH HOẠT VÍ TRẢ TRƯỚC CỦA ANH NGHĨA
+    // 2. KHÓA API CHUẨN ĐÃ KÍCH HOẠT VÍ TRẢ TRƯỚC CỦA ANH
     const REAL_GEMINI_KEY = "AIzaSyD08-L65stY2GTiNjik8hbKN9GPWeWI374";
 
-    // 3. ĐÓNG GÓI JSON BODY CHUẨN ĐÉT THEO TÀI LIỆU CẤP ĐỘ v1 GOOGLE API
-    const geminiPayload = {
-      contents: cleanContents,
-      generationConfig: { 
-        temperature: 0.7
-      }
-    };
-
-    // Chèn cấu trúc systemInstruction đúng chuẩn phân cấp v1 độc lập
-    if (systemPrompt) {
-      geminiPayload.systemInstruction = {
-        parts: [{ text: systemPrompt }]
-      };
-    }
-
-    // 4. TIẾN HÀNH GỌI SANG SERVER GOOGLE
+    // 3. GỌI API SANG GEMINI 2.0 FLASH
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${REAL_GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${REAL_GEMINI_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(geminiPayload)
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: cleanContents,
+          generationConfig: { 
+            maxOutputTokens: 800,
+            temperature: 0.7
+          }
+        })
       }
     );
 
     const data = await response.json();
 
-    // Kiểm tra trực tiếp nếu Google dội lỗi về hệ thống
+    // Bắt lỗi trực tiếp từ Google phản hồi về hệ thống
     if (data.error) {
-      console.error("Lỗi Google API phản hồi:", data.error.message);
+      console.error("Lỗi Google API:", data.error.message);
       return res.status(200).json({ ok: false, text: 'Mimi đang bận một chút, bé thử lại nhé!' });
     }
 
