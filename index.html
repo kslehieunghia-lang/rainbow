@@ -19,70 +19,125 @@
 }
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text)}
 
-/* SHELL */
 #app{
   position:fixed;top:0;left:0;right:0;bottom:0;
   display:flex;flex-direction:column;
-  background:var(--bg);
+  background:linear-gradient(180deg,#FFF0F5 0%,#FCE4EC 100%);
 }
 
-/* HEADER GROUP */
-.header{flex:0 0 auto;background:linear-gradient(180deg,var(--pink-light),var(--bg))}
-.top-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px 4px;gap:6px}
-.app-title{font-size:16px;font-weight:800;color:var(--pink-deep);flex-shrink:0}
+/* HEADER */
+.header{flex:0 0 auto;background:transparent;padding:env(safe-area-inset-top,0px) 0 0}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 4px;gap:6px}
+.app-title{font-size:17px;font-weight:800;color:var(--pink-deep);flex-shrink:0}
 .toggle-group{display:flex;background:white;border-radius:999px;padding:2px;gap:2px;box-shadow:var(--shadow)}
-.toggle-btn{padding:4px 9px;border-radius:999px;border:none;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;background:transparent;color:var(--text3);white-space:nowrap}
+.toggle-btn{padding:5px 11px;border-radius:999px;border:none;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;background:transparent;color:var(--text3);white-space:nowrap}
 .toggle-btn.active{background:var(--pink);color:white}
-.tab-bar{display:flex;padding:2px 12px 6px;gap:6px}
+.tab-bar{display:flex;padding:2px 14px 8px;gap:6px}
 .tab-btn{flex:1;padding:6px 0;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;background:white;color:var(--text3);box-shadow:var(--shadow)}
 .tab-btn.active{background:var(--pink-deep);color:white}
 
-/* CHARACTER */
-.character-area{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;padding:4px 0 2px;position:relative}
-#character{filter:drop-shadow(0 4px 9px rgba(212,83,126,0.2))}
+/* MAIN STAGE — thỏ + speech bubble */
+.stage{
+  flex:1 1 auto;min-height:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;padding:0 16px;
+}
+
+/* Speech bubble trên đầu */
+.speech-bubble{
+  position:relative;
+  background:white;
+  border-radius:20px;
+  padding:13px 18px;
+  max-width:88%;
+  min-height:52px;
+  box-shadow:0 4px 18px rgba(212,83,126,0.18);
+  font-size:15px;font-weight:700;line-height:1.5;
+  color:var(--text);
+  text-align:center;
+  margin-bottom:16px;
+  opacity:0;
+  transform:translateY(6px) scale(0.97);
+  transition:opacity .3s ease, transform .3s ease;
+  word-break:break-word;
+}
+.speech-bubble.show{opacity:1;transform:translateY(0) scale(1)}
+.speech-bubble::after{
+  content:'';position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);
+  border:7px solid transparent;border-top-color:white;
+  filter:drop-shadow(0 3px 3px rgba(212,83,126,0.1));
+}
+.speech-bubble.story-bubble{background:linear-gradient(135deg,#FFF8FB,#F3E5F5);border:1.5px solid var(--purple)}
+.speech-bubble.story-bubble::after{border-top-color:#F3E5F5}
+
+/* User echo — nhỏ hơn, màu hồng */
+.user-echo{
+  font-size:12px;font-weight:600;color:var(--text3);
+  background:var(--pink-light);border-radius:999px;
+  padding:4px 14px;margin-bottom:10px;
+  max-width:80%;text-align:center;
+  opacity:0;transition:opacity .25s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.user-echo.show{opacity:1}
+
+/* Thỏ */
+.bunny-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+#character{filter:drop-shadow(0 8px 20px rgba(212,83,126,0.25));transition:transform .1s}
 #character.hop   {animation:hop .4s ease-in-out infinite alternate}
 #character.wiggle{animation:wiggle .5s ease-in-out infinite alternate}
 #character.bounce{animation:bounce .45s ease-in-out infinite alternate}
 #character.shake {animation:shake .4s ease-in-out infinite alternate}
 #character.nod   {animation:nod .6s ease-in-out infinite alternate}
-@keyframes hop   {to{transform:translateY(-6px)}}
-@keyframes wiggle{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
-@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-@keyframes shake {0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
-@keyframes nod   {from{transform:translateY(0)}to{transform:translateY(-4px)}}
-.emotion-bubble{position:absolute;top:0;left:calc(50% + 38px);background:white;border-radius:12px 12px 12px 3px;padding:3px 7px;font-size:15px;box-shadow:var(--shadow);opacity:0;transform:scale(.4);transition:all .25s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:10}
-.emotion-bubble.show{opacity:1;transform:scale(1)}
-.status-pill{margin-top:2px;padding:3px 14px;border-radius:999px;background:white;box-shadow:var(--shadow);font-size:11px;font-weight:700;color:var(--pink-deep);text-align:center}
+@keyframes hop   {to{transform:translateY(-9px)}}
+@keyframes wiggle{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes shake {0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+@keyframes nod   {from{transform:translateY(0)}to{transform:translateY(-5px)}}
 
-/* CHAT */
-.chat-box{flex:1 1 auto;min-height:0;overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch}
-.chat-box::-webkit-scrollbar{width:3px}
-.chat-box::-webkit-scrollbar-thumb{background:var(--pink-light);border-radius:2px}
-.bubble{max-width:85%;padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.5;font-weight:600;word-break:break-word;animation:popIn .2s cubic-bezier(.34,1.56,.64,1)}
-@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.bubble.user{align-self:flex-end;background:var(--pink);color:white;border-radius:16px 16px 3px 16px}
-.bubble.ai{align-self:flex-start;background:white;color:var(--text);border-radius:16px 16px 16px 3px;box-shadow:var(--shadow)}
-.bubble.thinking{color:var(--text3);font-style:italic}
-.bubble.story{background:linear-gradient(135deg,#FFF8FB,#F3E5F5);border-left:3px solid var(--purple)}
+/* Bong bóng cảm xúc nhỏ cạnh thỏ */
+.emotion-bubble{
+  position:absolute;top:0;right:-10px;
+  background:white;border-radius:12px 12px 12px 3px;
+  padding:4px 8px;font-size:18px;
+  box-shadow:var(--shadow);
+  opacity:0;transform:scale(.4);
+  transition:all .25s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;
+}
+.emotion-bubble.show{opacity:1;transform:scale(1)}
+
+/* Status pill */
+.status-pill{
+  margin-top:12px;padding:5px 18px;border-radius:999px;
+  background:white;box-shadow:var(--shadow);
+  font-size:12px;font-weight:700;color:var(--pink-deep);text-align:center;
+  min-width:160px;
+}
 
 /* BOTTOM */
-.bottom-panel{flex:0 0 auto;padding:5px 12px 3px}
+.bottom-panel{flex:0 0 auto;padding:4px 14px 0}
 .panel-label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
 .chip-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .chip-row::-webkit-scrollbar{display:none}
-.chip{flex-shrink:0;padding:5px 11px;border-radius:999px;border:none;background:white;color:var(--text2);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);white-space:nowrap;transition:all .15s}
+.chip{flex-shrink:0;padding:5px 12px;border-radius:999px;border:none;background:white;color:var(--text2);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);white-space:nowrap;transition:all .15s}
 .chip.active{background:var(--pink-deep);color:white}
 .chip.story-chip{background:var(--purple-light);color:#7B1FA2}
 .chip.story-chip.active{background:#7B1FA2;color:white}
 
-.controls-area{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;padding:6px 16px 14px;background:linear-gradient(0deg,var(--pink-light),var(--bg))}
-.mic-btn{width:62px;height:62px;border-radius:50%;border:none;cursor:pointer;background:var(--pink-deep);display:flex;align-items:center;justify-content:center;box-shadow:0 5px 18px rgba(212,83,126,.4);transition:all .15s;touch-action:manipulation}
-.mic-btn:active{transform:scale(.92)}
+/* MIC */
+.controls-area{
+  flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
+  padding:8px 16px calc(16px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(0deg,var(--pink-light) 0%,transparent 100%);
+}
+.mic-btn{width:66px;height:66px;border-radius:50%;border:none;cursor:pointer;background:var(--pink-deep);display:flex;align-items:center;justify-content:center;box-shadow:0 5px 20px rgba(212,83,126,.45);transition:all .15s;touch-action:manipulation}
+.mic-btn:active{transform:scale(.9)}
 .mic-btn.recording{background:#c62828;animation:pulseMic 1s infinite}
 .mic-btn.story-mode{background:#7B1FA2;box-shadow:0 5px 18px rgba(123,31,162,.4)}
-@keyframes pulseMic{0%,100%{box-shadow:0 5px 18px rgba(198,40,40,.35)}50%{box-shadow:0 5px 32px rgba(198,40,40,.65)}}
-.mic-svg{width:26px;height:26px;fill:white}
-.mic-hint{margin-top:4px;font-size:11px;font-weight:700;color:var(--text3)}
+@keyframes pulseMic{0%,100%{box-shadow:0 5px 18px rgba(198,40,40,.35)}50%{box-shadow:0 5px 36px rgba(198,40,40,.7)}}
+.mic-svg{width:28px;height:28px;fill:white}
+.mic-hint{margin-top:5px;font-size:11px;font-weight:700;color:var(--text3)}
 .error-msg{margin-top:3px;font-size:11px;font-weight:600;color:#c62828;text-align:center;min-height:14px;padding:0 12px}
 </style>
 </head>
@@ -108,59 +163,65 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:v
     </div>
   </div>
 
-  <!-- CHARACTER -->
-  <div class="character-area">
-    <div class="emotion-bubble" id="emotion-bubble">😊</div>
-    <svg id="character" width="92" height="105" viewBox="0 0 130 150" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="42" cy="38" rx="13" ry="30" fill="#F4C0D1" stroke="#ED93B1" stroke-width="1"/>
-      <ellipse cx="42" cy="40" rx="7" ry="22" fill="#FBEAF0"/>
-      <ellipse cx="88" cy="38" rx="13" ry="30" fill="#F4C0D1" stroke="#ED93B1" stroke-width="1"/>
-      <ellipse cx="88" cy="40" rx="7" ry="22" fill="#FBEAF0"/>
-      <ellipse cx="65" cy="68" rx="46" ry="14" fill="#ED93B1"/>
-      <path d="M 19 72 Q 16 120 65 124 Q 114 120 111 72 Q 90 82 65 82 Q 40 82 19 72Z" fill="#ED93B1"/>
-      <circle cx="65" cy="75" r="38" fill="white" stroke="#F4C0D1" stroke-width="1"/>
-      <ellipse id="cheek-l" cx="44" cy="82" rx="9" ry="6" fill="#F4C0D1" opacity="0.7"/>
-      <ellipse id="cheek-r" cx="86" cy="82" rx="9" ry="6" fill="#F4C0D1" opacity="0.7"/>
-      <g id="eye-left">
-        <ellipse id="eye-l-white" cx="54" cy="70" rx="8" ry="9" fill="white"/>
-        <ellipse id="eye-l-iris" cx="54" cy="71" rx="5" ry="6" fill="#3C3489"/>
-        <circle cx="55.5" cy="69" r="2" fill="white"/>
-      </g>
-      <g id="eye-right">
-        <ellipse id="eye-r-white" cx="76" cy="70" rx="8" ry="9" fill="white"/>
-        <ellipse id="eye-r-iris" cx="76" cy="71" rx="5" ry="6" fill="#3C3489"/>
-        <circle cx="77.5" cy="69" r="2" fill="white"/>
-      </g>
-      <path id="brow-l" d="M 47 62 Q 54 59 61 62" stroke="#D4537E" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path id="brow-r" d="M 69 62 Q 76 59 83 62" stroke="#D4537E" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <ellipse cx="65" cy="80" rx="3.5" ry="2.5" fill="#D4537E"/>
-      <path id="mouth" d="M 55 86 Q 65 94 75 86" stroke="#D4537E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <path d="M 48 108 Q 65 118 82 108" stroke="#D4537E" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path d="M 57 112 Q 60 106 65 110 Q 70 106 73 112 Q 65 116 57 112Z" fill="#D4537E" opacity="0.8"/>
-      <circle cx="65" cy="112" r="3" fill="#993556"/>
-      <ellipse cx="42" cy="126" rx="12" ry="8" fill="#F4C0D1" stroke="#ED93B1" stroke-width="0.5"/>
-      <ellipse cx="88" cy="126" rx="12" ry="8" fill="#F4C0D1" stroke="#ED93B1" stroke-width="0.5"/>
-      <g id="stars" opacity="0">
-        <text x="16" y="54" font-size="13" fill="#FFD700">✦</text>
-        <text x="100" y="44" font-size="11" fill="#FFD700">✦</text>
-      </g>
-      <g id="hearts" opacity="0">
-        <text x="12" y="48" font-size="13">🤍</text>
-        <text x="102" y="52" font-size="11">🤍</text>
-      </g>
-      <g id="zzz" opacity="0">
-        <text x="90" y="50" font-size="11" fill="#9E9E9E" font-weight="bold">z</text>
-        <text x="98" y="43" font-size="9" fill="#9E9E9E" font-weight="bold">z</text>
-        <text x="104" y="37" font-size="7" fill="#9E9E9E" font-weight="bold">z</text>
-      </g>
-      <ellipse id="sweat" cx="88" cy="58" rx="0" ry="0" fill="#B3E5FC"/>
-    </svg>
-    <div class="status-pill" id="status-text">Nhấn mic để nói! 🎤</div>
-  </div>
+  <!-- STAGE -->
+  <div class="stage">
+    <!-- Speech bubble Mimi -->
+    <div class="speech-bubble" id="speech-bubble">Xin chào! Mình là Mimi 🌈</div>
 
-  <!-- CHAT -->
-  <div class="chat-box" id="chat-box">
-    <div class="bubble ai">Xin chào! Mình là Mimi 🌈 Hôm nay mình sẽ nói chuyện và luyện tiếng Anh cùng bạn nhé!</div>
+    <!-- Echo câu người dùng vừa nói -->
+    <div class="user-echo" id="user-echo"></div>
+
+    <!-- Thỏ -->
+    <div class="bunny-wrap">
+      <div class="emotion-bubble" id="emotion-bubble">😊</div>
+      <svg id="character" width="150" height="172" viewBox="0 0 130 150" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="42" cy="38" rx="13" ry="30" fill="#F4C0D1" stroke="#ED93B1" stroke-width="1"/>
+        <ellipse cx="42" cy="40" rx="7" ry="22" fill="#FBEAF0"/>
+        <ellipse cx="88" cy="38" rx="13" ry="30" fill="#F4C0D1" stroke="#ED93B1" stroke-width="1"/>
+        <ellipse cx="88" cy="40" rx="7" ry="22" fill="#FBEAF0"/>
+        <ellipse cx="65" cy="68" rx="46" ry="14" fill="#ED93B1"/>
+        <path d="M 19 72 Q 16 120 65 124 Q 114 120 111 72 Q 90 82 65 82 Q 40 82 19 72Z" fill="#ED93B1"/>
+        <circle cx="65" cy="75" r="38" fill="white" stroke="#F4C0D1" stroke-width="1"/>
+        <ellipse id="cheek-l" cx="44" cy="82" rx="9" ry="6" fill="#F4C0D1" opacity="0.7"/>
+        <ellipse id="cheek-r" cx="86" cy="82" rx="9" ry="6" fill="#F4C0D1" opacity="0.7"/>
+        <g id="eye-left">
+          <ellipse id="eye-l-white" cx="54" cy="70" rx="8" ry="9" fill="white"/>
+          <ellipse id="eye-l-iris" cx="54" cy="71" rx="5" ry="6" fill="#3C3489"/>
+          <circle cx="55.5" cy="69" r="2" fill="white"/>
+        </g>
+        <g id="eye-right">
+          <ellipse id="eye-r-white" cx="76" cy="70" rx="8" ry="9" fill="white"/>
+          <ellipse id="eye-r-iris" cx="76" cy="71" rx="5" ry="6" fill="#3C3489"/>
+          <circle cx="77.5" cy="69" r="2" fill="white"/>
+        </g>
+        <path id="brow-l" d="M 47 62 Q 54 59 61 62" stroke="#D4537E" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path id="brow-r" d="M 69 62 Q 76 59 83 62" stroke="#D4537E" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <ellipse cx="65" cy="80" rx="3.5" ry="2.5" fill="#D4537E"/>
+        <path id="mouth" d="M 55 86 Q 65 94 75 86" stroke="#D4537E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M 48 108 Q 65 118 82 108" stroke="#D4537E" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M 57 112 Q 60 106 65 110 Q 70 106 73 112 Q 65 116 57 112Z" fill="#D4537E" opacity="0.8"/>
+        <circle cx="65" cy="112" r="3" fill="#993556"/>
+        <ellipse cx="42" cy="126" rx="12" ry="8" fill="#F4C0D1" stroke="#ED93B1" stroke-width="0.5"/>
+        <ellipse cx="88" cy="126" rx="12" ry="8" fill="#F4C0D1" stroke="#ED93B1" stroke-width="0.5"/>
+        <g id="stars" opacity="0">
+          <text x="16" y="54" font-size="13" fill="#FFD700">✦</text>
+          <text x="100" y="44" font-size="11" fill="#FFD700">✦</text>
+        </g>
+        <g id="hearts" opacity="0">
+          <text x="12" y="48" font-size="13">🤍</text>
+          <text x="102" y="52" font-size="11">🤍</text>
+        </g>
+        <g id="zzz" opacity="0">
+          <text x="90" y="50" font-size="11" fill="#9E9E9E" font-weight="bold">z</text>
+          <text x="98" y="43" font-size="9" fill="#9E9E9E" font-weight="bold">z</text>
+          <text x="104" y="37" font-size="7" fill="#9E9E9E" font-weight="bold">z</text>
+        </g>
+        <ellipse id="sweat" cx="88" cy="58" rx="0" ry="0" fill="#B3E5FC"/>
+      </svg>
+    </div>
+
+    <!-- Status -->
+    <div class="status-pill" id="status-text">Nhấn mic để nói! 🎤</div>
   </div>
 
   <!-- BOTTOM PANEL -->
@@ -186,22 +247,29 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:v
 const MIC_ON ='<path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1.5 4v6a1.5 1.5 0 0 0 3 0V5a1.5 1.5 0 0 0-3 0zM7 11a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.92V20h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2.08A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"/>';
 const MIC_OFF='<line x1="1" y1="1" x2="23" y2="23" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V5a3 3 0 00-5.94-.6"/><path d="M17 16.95A7 7 0 015 12v-2m14 0v2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>';
 
-let mode='kid',lang='vi',tab='chat';
-let isRecording=false,isSpeaking=false,isWaiting=false;
-let recognition=null,chatHistory=[],storyHistory=[],selectedChip=null;
-let idleTimer=null,currentEmotion='happy';
+let mode='kid', lang='vi', tab='chat';
+let isRecording=false, isSpeaking=false, isWaiting=false;
+let recognition=null, chatHistory=[], storyHistory=[], selectedChip=null;
+let idleTimer=null, currentEmotion='happy';
+let voices=[], kidVoice=null, adultVoice=null;
 
 const TOPICS={
-  kid:  {vi:['Con vật 🐶','Màu sắc 🎨','Đồ ăn 🍎','Gia đình 👨‍👩‍👧','Đồ chơi 🧸','Siêu anh hùng 🦸'],en:['Animals 🐶','Colors 🎨','Food 🍎','Family 👨‍👩‍👧','Toys 🧸','Superheroes 🦸']},
-  adult:{vi:['Nấu ăn 🍳','Đi chợ 🛒','Thời tiết ☀️','Công việc 💼','Du lịch ✈️','Sức khỏe 💊'],   en:['Cooking 🍳','Shopping 🛒','Weather ☀️','Work 💼','Travel ✈️','Health 💊']}
+  kid:  {vi:['Con vật 🐶','Màu sắc 🎨','Đồ ăn 🍎','Gia đình 👨‍👩‍👧','Đồ chơi 🧸','Siêu anh hùng 🦸'],
+         en:['Animals 🐶','Colors 🎨','Food 🍎','Family 👨‍👩‍👧','Toys 🧸','Superheroes 🦸']},
+  adult:{vi:['Nấu ăn 🍳','Đi chợ 🛒','Thời tiết ☀️','Công việc 💼','Du lịch ✈️','Sức khỏe 💊'],
+         en:['Cooking 🍳','Shopping 🛒','Weather ☀️','Work 💼','Travel ✈️','Health 💊']}
 };
 const STORIES={
   vi:['Tấm Cám','Sơn Tinh Thủy Tinh','Khăn đỏ','Ba chú lợn','Bạch Tuyết','Lọ Lem','Vịt con xấu xí','Pinocchio','Alibaba','Nàng tiên cá'],
   en:['Red Riding Hood','Three Pigs','Snow White','Cinderella','Ugly Duckling','Pinocchio','Goldilocks','Jack & Beanstalk','Little Mermaid','Sleeping Beauty']
 };
 const GREET={
-  chat:{kid:{vi:'Xin chào! Mình là Mimi 🌈 Hôm nay mình muốn chơi và nói chuyện cùng bạn!',en:"Hello! I'm Mimi 🌈 Let's talk and play together!"},adult:{vi:'Chào bạn! Mình là Mimi 🌈 Cùng luyện tiếng Anh qua chuyện hàng ngày nhé!',en:"Hi! I'm Mimi 🌈 Let's practice English through daily conversations!"}},
-  story:{vi:'Chào bạn nhỏ! Mình là Mimi 🌈 Chọn một câu chuyện bên dưới để mình kể nhé! 📖',en:"Hello! I'm Mimi 🌈 Pick a story below and I'll tell it! 📖"}
+  chat:{kid:{vi:'Xin chào! Mình là Mimi 🌈 Hôm nay mình muốn chơi và nói chuyện cùng bạn!',
+             en:"Hello! I'm Mimi 🌈 Let's talk and play together!"},
+       adult:{vi:'Chào bạn! Mình là Mimi 🌈 Cùng luyện tiếng Anh qua chuyện hàng ngày nhé!',
+              en:"Hi! I'm Mimi 🌈 Let's practice English for daily family life!"}},
+  story:{vi:'Chào bạn nhỏ! Mình là Mimi 🌈 Chọn một câu chuyện bên dưới để mình kể nhé! 📖',
+         en:"Hello! I'm Mimi 🌈 Pick a story below and I'll tell it! 📖"}
 };
 
 const EMOTIONS={
@@ -220,6 +288,43 @@ function setStatus(t){g('status-text').textContent=t}
 function setError(t){g('error-msg').textContent=t}
 function setMicIcon(on){g('mic-icon').innerHTML=on?MIC_ON:MIC_OFF}
 
+// ── VOICE SELECTION ──────────────────────────────────────────────
+function loadVoices(){
+  voices=window.speechSynthesis.getVoices();
+  if(!voices.length)return;
+
+  // Ưu tiên: Google > Microsoft > mặc định; female > male; local > remote
+  function scoreVoice(v, langCode, preferHighPitch){
+    let score=0;
+    if(v.lang.startsWith(langCode))score+=100;
+    const n=v.name.toLowerCase();
+    if(n.includes('google'))score+=40;
+    if(n.includes('microsoft'))score+=30;
+    // Giọng nữ / nhẹ nhàng → ưu tiên cho kid
+    if(preferHighPitch){
+      if(n.includes('female')||n.includes('girl')||n.includes('zira')||n.includes('samantha')||n.includes('victoria')||n.includes('fiona')||n.includes('ava')||n.includes('hazel')||n.includes('susan')||n.includes('amelie')||n.includes('nora')||n.includes('sara')||n.includes('karen'))score+=20;
+    }
+    if(!v.localService)score-=5; // local thường mượt hơn
+    return score;
+  }
+
+  const viVoices = voices.filter(v=>v.lang.startsWith('vi'));
+  const enVoices = voices.filter(v=>v.lang.startsWith('en'));
+
+  // Kid voice: vi-VN hoặc en cao nhất
+  const langCode = lang==='vi'?'vi':'en';
+  const useKidLang = lang==='vi'?viVoices:enVoices;
+  if(useKidLang.length){
+    kidVoice=useKidLang.sort((a,b)=>scoreVoice(b,langCode,true)-scoreVoice(a,langCode,true))[0];
+  }
+  // Adult voice: tương tự nhưng không cần ưu tiên giọng nữ
+  adultVoice=kidVoice;
+}
+
+window.speechSynthesis.onvoiceschanged=loadVoices;
+loadVoices();
+
+// ── EMOTION ───────────────────────────────────────────────────────
 function applyEmotion(name,showBubble){
   const e=EMOTIONS[name]||EMOTIONS.happy;
   currentEmotion=name;
@@ -261,19 +366,37 @@ function detectEmotion(text){
 function extractEmotionTag(text){const m=text.match(/\[(happy|excited|surprised|love|laugh)\]/i);return m?m[1].toLowerCase():null}
 function stripEmotionTag(text){return text.replace(/\[(happy|excited|surprised|love|laugh)\]/gi,'').trim()}
 
-function addBubble(text,who,thinking,isStory){
-  const box=g('chat-box');
-  const div=document.createElement('div');
-  div.className='bubble '+who+(thinking?' thinking':'')+(isStory?' story':'');
-  div.textContent=text;
-  box.appendChild(div);box.scrollTop=box.scrollHeight;
-  return div;
+// ── SPEECH BUBBLE ─────────────────────────────────────────────────
+let bubbleHideTimer=null;
+function showSpeechBubble(text, isStory){
+  clearTimeout(bubbleHideTimer);
+  const b=g('speech-bubble');
+  b.textContent=text;
+  b.className='speech-bubble'+(isStory?' story-bubble':'');
+  // force reflow để animation chạy lại
+  void b.offsetWidth;
+  b.classList.add('show');
 }
-function resetIdleTimer(){
-  clearTimeout(idleTimer);
-  idleTimer=setTimeout(()=>applyEmotion('sleepy',true),30000);
+function hideSpeechBubble(delay){
+  clearTimeout(bubbleHideTimer);
+  bubbleHideTimer=setTimeout(()=>{
+    g('speech-bubble').classList.remove('show');
+  }, delay||3000);
 }
 
+function showUserEcho(text){
+  const e=g('user-echo');
+  e.textContent='🗣 '+text;
+  e.classList.add('show');
+  setTimeout(()=>e.classList.remove('show'),3000);
+}
+
+function resetIdleTimer(){
+  clearTimeout(idleTimer);
+  idleTimer=setTimeout(()=>applyEmotion('sleepy',true),35000);
+}
+
+// ── UI CONTROLS ───────────────────────────────────────────────────
 function setTab(t,btn){
   tab=t;selectedChip=null;
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -284,18 +407,19 @@ function setTab(t,btn){
 function setMode(m,btn){
   mode=m;selectedChip=null;chatHistory=[];
   g('mode-toggle').querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');renderPanel();resetChat();
+  btn.classList.add('active');loadVoices();renderPanel();resetChat();
 }
 function setLang(l,btn){
   lang=l;selectedChip=null;chatHistory=[];storyHistory=[];
   g('lang-toggle').querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(recognition)recognition.lang=l==='vi'?'vi-VN':'en-US';
-  renderPanel();resetChat();
+  loadVoices();renderPanel();resetChat();
 }
 function resetChat(){
   const gr=tab==='story'?GREET.story[lang]:GREET.chat[mode][lang];
-  g('chat-box').innerHTML='<div class="bubble ai">'+gr+'</div>';
+  showSpeechBubble(gr,false);
+  hideSpeechBubble(6000);
   setStatus(lang==='vi'?'Nhấn mic để nói! 🎤':'Press mic to talk! 🎤');
   g('mic-hint').textContent=lang==='vi'?'Nhấn để nói':'Press to talk';
   setError('');applyEmotion('happy',false);resetIdleTimer();
@@ -323,6 +447,7 @@ function selectStory(i,t){
   callAI(lang==='vi'?'Hãy bắt đầu kể chuyện "'+t+'" cho bé nghe! Kể phần mở đầu trước nhé!':'Please start telling the story "'+t+'"! Begin with the opening!',true,true);
 }
 
+// ── RECORDING ─────────────────────────────────────────────────────
 function toggleRecording(){
   if(isWaiting)return;
   if(isSpeaking){window.speechSynthesis.cancel();isSpeaking=false;applyEmotion('happy',false);}
@@ -340,11 +465,14 @@ function startRecording(){
     isRecording=true;g('mic-btn').classList.add('recording');setMicIcon(false);
     setStatus(lang==='vi'?'🎙 Đang nghe...':'🎙 Listening...');
     applyEmotion('listening',false);
+    hideSpeechBubble(200);
   };
   recognition.onresult=function(e){
     const text=e.results[0][0].transcript;
-    stopRecording();addBubble(text,'user',false,false);
-    callAI(text,false,tab==='story');resetIdleTimer();
+    stopRecording();
+    showUserEcho(text);
+    callAI(text,false,tab==='story');
+    resetIdleTimer();
   };
   recognition.onerror=function(e){
     stopRecording();
@@ -361,12 +489,13 @@ function stopRecording(){
   setStatus(lang==='vi'?'Đang xử lý...':'Processing...');
 }
 
-// ── GỌI API (thay google.script.run bằng fetch) ──────────────────
+// ── CALL AI ───────────────────────────────────────────────────────
 function callAI(userText,isSystem,isStory){
   if(isWaiting)return;
   isWaiting=true;
   applyEmotion('thinking',true);
-  const thinking=addBubble(lang==='vi'?'Mimi đang nghĩ...':'Mimi is thinking...','ai',true,false);
+  showSpeechBubble(lang==='vi'?'Mimi đang nghĩ... 💭':'Thinking... 💭', false);
+
   let history=isStory?storyHistory:chatHistory;
   if(!isSystem)history.push({role:'user',content:userText});
   const messages=isSystem?[{role:'user',content:userText}]:history.slice();
@@ -382,41 +511,75 @@ function callAI(userText,isSystem,isStory){
   })
   .then(r=>r.json())
   .then(function(result){
-    isWaiting=false;thinking.remove();
+    isWaiting=false;
     let raw=result.text||(lang==='vi'?'Mimi chưa hiểu, nói lại nhé!':"Mimi didn't catch that!");
     const tag=extractEmotionTag(raw);
     const clean=stripEmotionTag(raw);
     applyEmotion(tag||detectEmotion(clean),true);
-    addBubble(clean,'ai',false,isStory);
+    showSpeechBubble(clean, isStory);
     history.push({role:'assistant',content:clean});
     if(history.length>30){if(isStory)storyHistory=history.slice(-30);else chatHistory=history.slice(-30);}
     setStatus(lang==='vi'?'🔊 Mimi đang nói...':'🔊 Mimi is speaking...');
-    speak(clean);
+    speak(clean, isStory);
   })
   .catch(function(){
-    isWaiting=false;thinking.remove();
-    addBubble(lang==='vi'?'Có lỗi kết nối, thử lại nhé!':'Connection error, try again!','ai',false,false);
+    isWaiting=false;
+    showSpeechBubble(lang==='vi'?'Có lỗi kết nối, thử lại nhé!':'Connection error, try again!', false);
     applyEmotion('surprised',true);setStatus('');
+    hideSpeechBubble(4000);
   });
 }
-// ─────────────────────────────────────────────────────────────────
 
-function speak(text){
+// ── SPEAK ─────────────────────────────────────────────────────────
+function speak(text, isStory){
   window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang=lang==='vi'?'vi-VN':'en-US';
-  u.rate=(mode==='kid'||tab==='story')?0.82:0.95;
-  u.pitch=(mode==='kid'||tab==='story')?1.25:1.05;
-  if(currentEmotion==='excited'||currentEmotion==='laugh')u.rate+=0.05;
-  if(currentEmotion==='sleepy')u.rate-=0.1;
+  // Tách câu để thêm ngắt nghỉ tự nhiên
+  const sentences=text.match(/[^.!?。！？]+[.!?。！？]*/g)||[text];
+  let idx=0;
+
+  function speakNext(){
+    if(idx>=sentences.length){
+      isSpeaking=false;
+      if(currentEmotion!=='sleepy')applyEmotion('happy',false);
+      setStatus(lang==='vi'?'Nhấn mic để trả lời! 🎤':'Press mic to reply! 🎤');
+      hideSpeechBubble(5000);
+      resetIdleTimer();
+      return;
+    }
+    const sentence=sentences[idx++].trim();
+    if(!sentence){speakNext();return;}
+
+    const u=new SpeechSynthesisUtterance(sentence);
+    u.lang=lang==='vi'?'vi-VN':'en-US';
+
+    // Chọn giọng phù hợp
+    if(kidVoice && (mode==='kid'||isStory)) u.voice=kidVoice;
+    else if(adultVoice) u.voice=adultVoice;
+
+    // Rate & pitch theo mode
+    if(mode==='kid'||isStory){
+      u.rate=0.80;u.pitch=1.3;
+    } else {
+      u.rate=0.92;u.pitch=1.05;
+    }
+    // Điều chỉnh theo cảm xúc
+    if(currentEmotion==='excited'||currentEmotion==='laugh'){u.rate+=0.06;u.pitch+=0.1;}
+    if(currentEmotion==='sleepy'){u.rate-=0.12;u.pitch-=0.1;}
+    if(currentEmotion==='surprised'){u.pitch+=0.15;}
+
+    u.onend=function(){setTimeout(speakNext,120);}; // ngắt nhỏ giữa câu
+    u.onerror=function(){speakNext();};
+    window.speechSynthesis.speak(u);
+  }
+
   isSpeaking=true;
-  u.onend=function(){isSpeaking=false;if(currentEmotion!=='sleepy')applyEmotion('happy',false);setStatus(lang==='vi'?'Nhấn mic để trả lời! 🎤':'Press mic to reply! 🎤');resetIdleTimer();};
-  u.onerror=function(){isSpeaking=false;};
-  window.speechSynthesis.speak(u);
+  speakNext();
 }
 
+// ── INIT ──────────────────────────────────────────────────────────
 renderPanel();
 applyEmotion('happy',false);
+resetChat();
 resetIdleTimer();
 </script>
 </body>
